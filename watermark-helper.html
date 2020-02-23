@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>水印助手</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+        }
+
+        img {
+            border: 3px solid #2c3e50;
+            border-radius: 5px;
+            width: 100%;
+            box-sizing: border-box
+        }
+
+        canvas {
+            width: 100%;
+            max-width: 60vh;
+            height: 0;
+        }
+
+        label, a {
+            display: flex;
+            align-items: center;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+<canvas></canvas>
+<div>
+    <input id="upload-input" type="file" accept="image/*">
+    <label>
+        水印文字：
+        <input id="content" type="text" value="仅供XX实名认证使用">
+    </label>
+    <label>
+        水印颜色：
+        <input id="color" type="color" value="#ffffff">
+    </label>
+    <label>
+        不透明度：
+        <input id="alpha" type="range" min="10" max="100" value="50">
+    </label>
+    <label>
+        水印大小比：
+        <input id="size" type="range" min="3" max="10" value="5">
+    </label>
+    <label>
+        水印间隔比：
+        <input id="gap" type="range" min="20" max="300" value="150">
+    </label>
+    <label>
+        水印字体：
+        <input id="font" type="text"  value="sans-serif">
+    </label>
+    <a href="javascript:alert('请先打开图片')" download>保存图片</a>
+</div>
+<script>
+    let img = null;
+    document.getElementById('upload-input').addEventListener('change', function (ev) {
+        if (!ev.target.files.length) return;
+        let file = ev.target.files[0];
+        createImageBitmap(file).then(result => {
+            img = result;
+            repaint()
+        });
+    });
+    document.addEventListener('input', function (ev) {
+        if (ev.target.type !== 'file') {
+            repaint()
+        }
+    });
+
+    function repaint() {
+        if (!img) return;
+        let ctx = document.getElementsByTagName('canvas')[0].getContext('2d');
+        ctx.canvas.width = img.width;
+        ctx.canvas.height = img.height;
+        let maxSize = Math.max(img.height, img.width);
+        ctx.canvas.style.height = (img.height / img.width) * 100 + '%';
+        ctx.restore();
+        ctx.drawImage(img, 0, 0);
+        ctx.fillStyle = document.getElementById('color').value;
+        ctx.globalAlpha = document.getElementById('alpha').value / 100;
+        let size = (document.getElementById('size').value * maxSize / 100);
+        ctx.font = size + 'px "'+document.getElementById('font').value+'"';
+        ctx.textBaseline = 'middle';
+        ctx.rotate(-45 * Math.PI / 180);
+        let gap = size * document.getElementById('gap').value / 100;
+        let content = document.getElementById('content').value;
+        if (!content.length) return;
+        let limit = Math.sqrt(2*(maxSize*maxSize));
+        let breaker = ctx.measureText(content).width;
+        for (let h = -maxSize, even = false; h <= limit; h += size + gap, even = !even){
+            for (let v = -maxSize-(even?breaker/2:0); v<=limit+(even?breaker/2:0); v += breaker + size){
+                ctx.fillText(content, v, h);
+            }
+        }
+        document.getElementsByTagName('a')[0].href = ctx.canvas.toDataURL()
+    }
+    if (!('createImageBitmap' in window)) {
+        window.createImageBitmap = async function(blob) {
+            return new Promise((resolve,_) => {
+                let img = document.createElement('img');
+                img.addEventListener('load', function() {
+                    resolve(this);
+                });
+                img.src = URL.createObjectURL(blob);
+            });
+        }
+    }
+</script>
+</body>
+</html>
