@@ -8,9 +8,10 @@
 - HTML文件
 
     直接用浏览器打开[watermark-helper.html](watermark-helper.html) 或 [watermark-helper.min.html](watermark-helper.min.html)(压缩版)即可。
-- DataLink
+- DataLink **推荐**
     
     使用浏览器打开[data-link.txt](data-link.txt)文件中的链接即可，直接执行文件，可添加到收藏夹。
+    > 请注意部分国产浏览器不支持这么长的链接，如果出现网页显示不全或操作无反应的话，请换用上一种方法。
     
 ## 额外说明
 - 水印大小比：根据图片的大小缩放字体的比例（3%~10%）
