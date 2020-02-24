@@ -65,7 +65,7 @@
         if (ev.target.type === 'file') {
             if (!ev.target.files.length) return;
             var file = ev.target.files[0];
-            createImageBitmap(file).then(function (result) {
+            createBitmap(file, function (result) {
                 img = result;
                 repaint()
             });
@@ -101,16 +101,12 @@
         }
         document.getElementsByTagName('a')[0].href = ctx.canvas.toDataURL()
     }
-    if (!('createImageBitmap' in window)) {
-        window.createImageBitmap = function(blob) {
-            return new Promise(function (resolve, _) {
-                var img = document.createElement('img');
-                img.addEventListener('load', function () {
-                    resolve(this);
-                });
-                img.src = URL.createObjectURL(blob);
-            });
-        }
+    function createBitmap(blob, callback) {
+        var img = document.createElement('img');
+        img.addEventListener('load', function () {
+            callback(this);
+        });
+        img.src = URL.createObjectURL(blob);
     }
 </script>
 </body>
