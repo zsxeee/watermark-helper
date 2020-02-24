@@ -1,0 +1,13 @@
+{
+  "name": "watermark-helper",
+  "version": "1.0.0",
+  "description": "水印助手",
+  "main": "index.js",
+  "repository": "https://github.com/zsxeee/Watermark-helper.git",
+  "author": "zsxeee <zsxeee@qq.com>",
+  "license": "MIT",
+  "dependencies": {
+    "html-minifier": "^4.0.0",
+    "js-base64": "^2.5.2"
+  }
+}
