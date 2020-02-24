@@ -61,16 +61,15 @@
 </div>
 <script>
     var img = null;
-    document.getElementById('upload-input').addEventListener('change', function (ev) {
-        if (!ev.target.files.length) return;
-        var file = ev.target.files[0];
-        createImageBitmap(file).then(function (result) {
-            img = result;
-            repaint()
-        });
-    });
-    document.addEventListener('input', function (ev) {
-        if (ev.target.type !== 'file') {
+    document.addEventListener('change', function (ev) {
+        if (ev.target.type === 'file') {
+            if (!ev.target.files.length) return;
+            var file = ev.target.files[0];
+            createImageBitmap(file).then(function (result) {
+                img = result;
+                repaint()
+            });
+        } else {
             repaint()
         }
     });
