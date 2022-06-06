@@ -69,6 +69,9 @@
                 img = result;
                 repaint()
             });
+            var newName = file.name.split('.');
+            newName.splice(-1, 0, 'watermarked');
+            document.getElementsByTagName('a')[0].download = newName.join('.');
         } else {
             repaint()
         }
@@ -86,7 +89,7 @@
         ctx.fillStyle = document.getElementById('color').value;
         ctx.globalAlpha = document.getElementById('alpha').value / 100;
         var size = (document.getElementById('size').value * maxSize / 100);
-        ctx.font = size + 'px "'+document.getElementById('font').value+'"';
+        ctx.font = size + 'px "' + document.getElementById('font').value + '"';
         ctx.textBaseline = 'middle';
         ctx.rotate(-45 * Math.PI / 180);
         var gap = size * document.getElementById('gap').value / 100;
