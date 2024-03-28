@@ -1,116 +1,148 @@
 <!DOCTYPE html>
 <html lang="zh">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>水印助手</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <style>
-        body {
-            margin: auto;
-            max-width: 60vh;
-        }
+      body {
+        margin: auto;
+        max-width: 60vh;
+      }
 
-        img {
-            border: 3px solid #2c3e50;
-            border-radius: 5px;
-            width: 100%;
-            box-sizing: border-box
-        }
+      img {
+        border: 3px solid #2c3e50;
+        border-radius: 5px;
+        width: 100%;
+        box-sizing: border-box;
+      }
 
-        canvas {
-            width: 100%;
-            height: 0;
-        }
+      canvas {
+        width: 0;
+        height: 0;
+      }
 
-        label, a {
-            display: flex;
-            align-items: center;
-            margin-top: 8px;
-        }
+      label,
+      a {
+        display: flex;
+        align-items: center;
+        margin-top: 8px;
+      }
     </style>
-</head>
-<body>
-<canvas></canvas>
-<div>
-    <input id="upload-input" type="file" accept="image/*">
-    <label>
+  </head>
+  <body>
+    <canvas></canvas>
+    <img style="border: 0" />
+    <div>
+      <input id="upload-input" type="file" accept="image/*" />
+      <label>
         水印文字：
-        <input id="content" type="text" value="仅供XX实名认证使用">
-    </label>
-    <label>
+        <input id="content" type="text" value="仅供XX实名认证使用" />
+      </label>
+      <label>
         水印颜色：
-        <input id="color" type="color" value="#ffffff">
-    </label>
-    <label>
+        <input id="color" type="color" value="#ffffff" />
+      </label>
+      <label>
+        图片大小：
+        <input id="width" type="number" value="2048" />
+      </label>
+      <label>
+        图片质量：
+        <input id="quality" type="range" min="1" max="100" value="80" />
+      </label>
+      <label>
         不透明度：
-        <input id="alpha" type="range" min="10" max="100" value="50">
-    </label>
-    <label>
+        <input id="alpha" type="range" min="10" max="100" value="50" />
+      </label>
+      <label>
         水印大小比：
-        <input id="size" type="range" min="3" max="10" value="5">
-    </label>
-    <label>
+        <input id="size" type="range" min="3" max="10" value="5" />
+      </label>
+      <label>
         水印间隔比：
-        <input id="gap" type="range" min="20" max="300" value="150">
-    </label>
-    <label>
+        <input id="gap" type="range" min="20" max="300" value="150" />
+      </label>
+      <label>
         水印字体：
-        <input id="font" type="text"  value="sans-serif">
-    </label>
-    <a href="javascript:alert('请先打开图片')" download>保存图片</a>
-</div>
-<script>
-    var img = null;
-    document.addEventListener('change', function (ev) {
+        <input id="font" type="text" value="sans-serif" />
+      </label>
+      <a href="javascript:alert('请先打开图片')" download>保存图片</a>
+    </div>
+    <script>
+      var img = null;
+      document.addEventListener('change', function (ev) {
         if (ev.target.type === 'file') {
-            if (!ev.target.files.length) return;
-            var file = ev.target.files[0];
-            createBitmap(file, function (result) {
-                img = result;
-                repaint()
-            });
-            var newName = file.name.split('.');
-            newName.splice(-1, 0, 'watermarked');
-            document.getElementsByTagName('a')[0].download = newName.join('.');
+          if (!ev.target.files.length) return;
+          var file = ev.target.files[0];
+          createBitmap(file, function (result) {
+            img = result;
+            repaint();
+          });
+          var newName = file.name.split('.');
+          newName.splice(-1, 0, 'watermarked');
+          document.getElementsByTagName('a')[0].download = newName.join('.');
         } else {
-            repaint()
+          repaint();
         }
-    });
+      });
 
-    function repaint() {
+      function repaint() {
+        const now0 = +new Date();
         if (!img) return;
         var ctx = document.getElementsByTagName('canvas')[0].getContext('2d');
-        ctx.canvas.width = img.width;
-        ctx.canvas.height = img.height;
-        var maxSize = Math.max(img.height, img.width);
-        ctx.canvas.style.height = (img.height / img.width) * 100 + '%';
+        const width = document.getElementById('width').value;
+        const height = (img.height * width) / img.width;
+        ctx.canvas.width = width;
+        ctx.canvas.height = height;
+        var maxSize = Math.max(height, width);
         ctx.restore();
-        ctx.drawImage(img, 0, 0);
+        ctx.drawImage(img, 0, 0, width, height);
         ctx.fillStyle = document.getElementById('color').value;
         ctx.globalAlpha = document.getElementById('alpha').value / 100;
-        var size = (document.getElementById('size').value * maxSize / 100);
+        var size = (document.getElementById('size').value * maxSize) / 100;
         ctx.font = size + 'px "' + document.getElementById('font').value + '"';
         ctx.textBaseline = 'middle';
-        ctx.rotate(-45 * Math.PI / 180);
-        var gap = size * document.getElementById('gap').value / 100;
+        ctx.rotate((-45 * Math.PI) / 180);
+        var gap = (size * document.getElementById('gap').value) / 100;
         var content = document.getElementById('content').value;
         if (!content.length) return;
-        var limit = Math.sqrt(2*(maxSize*maxSize));
+        var limit = Math.sqrt(2 * (maxSize * maxSize));
         var breaker = ctx.measureText(content).width;
-        for (var h = -maxSize, even = false; h <= limit; h += size + gap, even = !even){
-            for (var v = -maxSize-(even?breaker/2:0); v<=limit+(even?breaker/2:0); v += breaker + size){
-                ctx.fillText(content, v, h);
-            }
+        for (
+          var h = -maxSize, even = false;
+          h <= limit;
+          h += size + gap, even = !even
+        ) {
+          for (
+            var v = -maxSize - (even ? breaker / 2 : 0);
+            v <= limit + (even ? breaker / 2 : 0);
+            v += breaker + size
+          ) {
+            ctx.fillText(content, v, h);
+          }
         }
-        document.getElementsByTagName('a')[0].href = ctx.canvas.toDataURL()
-    }
-    function createBitmap(blob, callback) {
+
+        const quality = document.getElementById('quality').value;
+        ctx.canvas.toBlob(
+          (e) => {
+            const url = URL.createObjectURL(e);
+            const a = document.getElementsByTagName('a')[0];
+            a.href = url;
+            a.innerText = `保存图片（${Math.ceil(e.size / 1024)}kb）`;
+            document.getElementsByTagName('img')[0].src = url;
+          },
+          'image/jpeg',
+          quality / 100
+        );
+      }
+      function createBitmap(blob, callback) {
         var img = document.createElement('img');
         img.addEventListener('load', function () {
-            callback(this);
+          callback(this);
         });
         img.src = URL.createObjectURL(blob);
-    }
-</script>
-</body>
+      }
+    </script>
+  </body>
 </html>
