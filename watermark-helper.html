@@ -60,6 +60,10 @@
         <input id="size" type="range" min="3" max="10" value="5" />
       </label>
       <label>
+        旋转角度：
+        <input id="angle" type="range" min="-180" max="180" value="45">
+      </label>
+      <label>
         水印间隔比：
         <input id="gap" type="range" min="20" max="300" value="150" />
       </label>
@@ -102,7 +106,7 @@
         var size = (document.getElementById('size').value * maxSize) / 100;
         ctx.font = size + 'px "' + document.getElementById('font').value + '"';
         ctx.textBaseline = 'middle';
-        ctx.rotate((-45 * Math.PI) / 180);
+        ctx.rotate(document.getElementById('angle').value * Math.PI / 180);
         var gap = (size * document.getElementById('gap').value) / 100;
         var content = document.getElementById('content').value;
         if (!content.length) return;
